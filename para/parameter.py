@@ -28,15 +28,15 @@ class Parameter:
         self.parser.add_argument('--dataset', type=str, default='BSD', help='BSD, gopro_ds_lmdb, reds_lmdb')
         self.parser.add_argument('--save_dir', type=str, default='./experiment/',
                                  help='directory to save logs of experiments')
-        self.parser.add_argument('--frames', type=int, default=5, help='# of frames of subsequence')
-        self.parser.add_argument('--ds_config', type=str, default='1ms8ms', help='1ms8ms, 2ms16ms or 3ms24ms')
+        self.parser.add_argument('--frames', type=int, default=10, help='# of frames of subsequence')
+        self.parser.add_argument('--ds_config', type=str, default='2ms16ms', help='1ms8ms, 2ms16ms or 3ms24ms')
         self.parser.add_argument('--data_format', type=str, default='RGB', help='RGB or RAW')
         self.parser.add_argument('--patch_size', type=int, nargs='*', default=[256, 256])
 
         # model parameters
         self.parser.add_argument('--model', type=str, default='ESTRNN', help='type of model to construct')
-        self.parser.add_argument('--n_features', type=int, default=12, help='base # of channels for Conv')
-        self.parser.add_argument('--n_blocks', type=int, default=9, help='# of blocks in middle part of the model')
+        self.parser.add_argument('--n_features', type=int, default=16, help='base # of channels for Conv')
+        self.parser.add_argument('--n_blocks', type=int, default=12, help='# of blocks in middle part of the model')
         self.parser.add_argument('--future_frames', type=int, default=2, help='use # of future frames')
         self.parser.add_argument('--past_frames', type=int, default=2, help='use # of past frames')
         self.parser.add_argument('--activation', type=str, default='gelu', help='activation function')

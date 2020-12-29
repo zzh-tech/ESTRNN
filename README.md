@@ -1,10 +1,11 @@
 # ESTRNN
-[Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)](http://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)  
+[Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)  
 
 by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
 
 ## Results
+
 ### Results on REDS
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/reds.gif)
 
@@ -18,6 +19,7 @@ by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
 
 ## Prerequisites
+
 - Python 3.6
 - PyTorch 1.6 with GPU
 - opencv-python
@@ -26,51 +28,53 @@ by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 - thop
 - tqdm
 - tensorboard
-- lpips
 
-## Training
-Take GOPRO as an example, we first prepared the datasets in LMDB format.  
 
-You can download the original down-sampled GOPRO dataset [("*gopro_ds*")](https://drive.google.com/file/d/1vZutfe4pjm9anDtdJPc1f3mu62pDtXt_/view?usp=sharing) and use "*./tool/lmdb_gopro_ds.ipynb*" to create "*gopro_ds_lmdb*", or directly download the one we have made  [("*gopro_ds_lmdb*")](https://drive.google.com/file/d/1uJDxMnTAJ3KSm2oCikIe8Vt80KXMGq3N/view?usp=sharing).
+## Beam-Splitter Deblurring Dataset (BSD)
 
-Then, please specify the *\<path\>* (e.g. "*./dataset/* ") where you put the folder "*gopro_ds_lmdb*" in command, or change the default value of "*data_root*" in "*./para/\_\_init\_\_.py*".
-
-Training command is as below:
-
-```bash
-python main.py --data_root <path>
-```
-
-You can also tune the hyper parameters such as batch size, learning rate, epoch number, etc., by specifying it in command or changing the corresponding value in "*./para/\_\_init\_\_.py*".   
-```bash
-python main.py --data_root <path> --lr 1e-4 --batch_size 4 --num_gpus 2 --trainer_mode ddp
-```
-
-Test only command:
-
-```bash
-python main.py --test_only --video --test_checkpoint <path> --test_save_dir <path> 
-```
-
-## Beam-Splitter Dataset (BSD)
-
-Now, we are trying to collect a more complete beam-splitter dataset for video deblurring, using the proposed beam-splitter capture system as below:  
+We have collected a new [BSD dataset](https://drive.google.com/file/d/1oBFvNxk6wn8SvioLGuqp43D8DtcQjItq/view?usp=sharing) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
 
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_system.png)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_demo.gif)
 
+The configurations of the new BSD dataset are as below:
 
-We will release our BSD dataset soon...
+<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="600"/>
+
+
+## Training
+
+Please download and unzip the dataset file for each benchmark.
+
+- [BSD](https://drive.google.com/file/d/1oBFvNxk6wn8SvioLGuqp43D8DtcQjItq/view?usp=sharing)
+- [GOPRO-DS](https://drive.google.com/file/d/1Tni2gZzI_Hd03Msc8Rrxl5JklznqO9AG/view?usp=sharing)
+- [REDS](https://drive.google.com/file/d/1wMOtIqmnNfXqe0_-Xq0Xj6WMspCaEgRR/view?usp=sharing)
+
+Then, specify the *\<path\>* (e.g. "*./dataset/* ") where you put the dataset file and the corresponding dataset configurations in the command, or change the default values in "*./para/paramter.py*". 
+
+Training command is as below:
+
+```bash
+python main.py --data_root <path> --dataset BSD --ds_config 2ms16ms --data_format RGB
+```
+
+You can also tune the hyper parameters such as batch size, learning rate, epoch number, etc. (P.S.: the actual batch size for ddp mode is num_gpus*batch_size) 
+```bash
+python main.py --lr 1e-4 --batch_size 4 --num_gpus 2 --trainer_mode ddp
+```
+
 
 ## Citing
+
 If you use any part of our code, or ESTRNN and BSD are useful for your research, please consider citing:
 
 ```bibtex
-@InProceedings{Zhong_2020_ECCV,
-  title={Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring},
-  author={Zhong, Zhihang and Ye, Gao and Zheng, Yinqiang and Bo, Zheng},
-  booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
-  month = {August},
-  year={2020}
+@inproceedings{zhong2020efficient,
+  title={Efficient spatio-temporal recurrent neural network for video deblurring},
+  author={Zhong, Zhihang and Gao, Ye and Zheng, Yinqiang and Zheng, Bo},
+  booktitle={European Conference on Computer Vision},
+  pages={191--207},
+  year={2020},
+  organization={Springer}
 }
 ```

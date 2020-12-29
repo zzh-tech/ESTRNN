@@ -3,13 +3,13 @@ from train import Trainer
 
 if __name__ == '__main__':
     para = Parameter().args
-    para.model = 'ESTRNN'
+    # para.model = 'ESTRNN'
 
     # # choose one dataset
-    para.dataset = 'BSD'
+    # para.dataset = 'BSD'
     # para.dataset = 'gopro_ds_lmdb'
     # para.dataset = 'reds_lmdb'
-    para.video = True
+    # para.video = True
 
     # # resume training from existing checkpoint
     # para.resume = True

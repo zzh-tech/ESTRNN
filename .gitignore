@@ -1,4 +1,10 @@
 __pycache__/
 experiment/
 results/
-.idea/
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+.*

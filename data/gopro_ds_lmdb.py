@@ -124,4 +124,3 @@ class Dataloader:
 
     def __len__(self):
         return self.loader_len
->>>>>>> dev
