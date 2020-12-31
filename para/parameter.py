@@ -50,7 +50,7 @@ class Parameter:
 
         # optimizer parameters
         self.parser.add_argument('--optimizer', type=str, default='Adam', help='method of optimization')
-        self.parser.add_argument('--lr', type=float, default=5e-4, help='learning rate')
+        self.parser.add_argument('--lr', type=float, default=1e-3, help='learning rate')
         self.parser.add_argument('--lr_scheduler', type=str, default='cosine',
                                  help='learning rate adjustment stratedy')
         self.parser.add_argument('--batch_size', type=int, default=8, help='batch size')

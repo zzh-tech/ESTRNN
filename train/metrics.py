@@ -57,7 +57,6 @@ def ssim_calculate(x, y):
 #     return lpips_value.item()
 
 
-# input range 0-1
 class PSNR(_Loss):
     def __init__(self, centralize=True, normalize=True):
         super(PSNR, self).__init__()

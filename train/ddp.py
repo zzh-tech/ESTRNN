@@ -185,6 +185,7 @@ def dist_train(train_loader, model, criterion, metrics, opt, epoch, para, logger
         for key in losses_name:
             logger.writer.add_scalar(key + '_loss_train', losses_meter[key].avg, epoch)
         logger.writer.add_scalar(para.metrics + '_train', measure_meter.avg, epoch)
+        logger.writer.add_scalar('lr', opt.get_lr(), epoch)
 
         # show info
         logger('[train] epoch time: {:.2f}s, average batch time: {:.2f}s'.format(end - start, batchtime_meter.avg),

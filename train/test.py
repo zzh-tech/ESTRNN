@@ -53,7 +53,6 @@ def _test_torch(para, logger, model, ds_type):
     seq_length = 100
     for seq in seqs:
         logger('seq {} image results generating ...'.format(seq))
-        torch.cuda.empty_cache()
         dir_name = '_'.join((para.dataset, para.model, 'test'))
         save_dir = join(para.test_save_dir, dir_name, seq)
         os.makedirs(save_dir, exist_ok=True)
@@ -66,35 +65,28 @@ def _test_torch(para, logger, model, ds_type):
             for frame_idx in range(start, end):
                 blur_img_path = join(dataset_path, seq, 'Blur', para.data_format, '{:08d}.{}'.format(frame_idx, suffix))
                 sharp_img_path = join(dataset_path, seq, 'Sharp', 'RGB', '{:08d}.{}'.format(frame_idx, 'png'))
-                blur_img = normalize(cv2.imread(blur_img_path).transpose(2, 0, 1)[np.newaxis, ...],
-                                     centralize=True, normalize=True)
-                gt_img = normalize(cv2.imread(sharp_img_path).transpose(2, 0, 1)[np.newaxis, ...],
-                                   centralize=True, normalize=True)
+                blur_img = cv2.imread(blur_img_path).transpose(2, 0, 1)[np.newaxis, ...]
+                gt_img = cv2.imread(sharp_img_path)
                 input_seq.append(blur_img)
                 label_seq.append(gt_img)
-
             input_seq = np.concatenate(input_seq)[np.newaxis, :]
-            label_seq = np.concatenate(label_seq)[np.newaxis, :]
             model.eval()
             with torch.no_grad():
-                input_seq = torch.from_numpy(input_seq).float().cuda()
-                label_seq = torch.from_numpy(label_seq).float().cuda()
+                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=True, normalize=True)
                 time_start = time.time()
-                output_seq = model([input_seq, label_seq]).squeeze(dim=0)
-                timer.update(time.time() - time_start, n=len(output_seq))
-
+                output_seq = model([input_seq, ]).squeeze(dim=0)
+                timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
-                blur_img = input_seq.squeeze()[frame_idx].squeeze()
-                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0))
-                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True).astype(np.uint8)
+                blur_img = input_seq.squeeze()[frame_idx]
+                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True)
+                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
                 blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))
-                gt_img = label_seq.squeeze()[frame_idx].squeeze()
-                gt_img = gt_img.detach().cpu().numpy().transpose((1, 2, 0))
-                gt_img = normalize_reverse(gt_img, centralize=True, normalize=True).astype(np.uint8)
+                gt_img = label_seq[frame_idx]
                 gt_img_path = join(save_dir, '{:08d}_gt.png'.format(frame_idx + start))
                 deblur_img = output_seq[frame_idx - para.past_frames]
-                deblur_img = deblur_img.detach().cpu().numpy().clip(0, 255).transpose((1, 2, 0))
-                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True).astype(np.uint8)
+                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True)
+                deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0))
+                deblur_img = np.clip(deblur_img, 0, 255).astype(np.uint8)
                 deblur_img_path = join(save_dir, '{:08d}_{}.png'.format(frame_idx + start, para.model.lower()))
                 cv2.imwrite(blur_img_path, blur_img)
                 cv2.imwrite(gt_img_path, gt_img)
@@ -150,7 +142,6 @@ def _test_lmdb(para, logger, model, ds_type):
         seq_length = seqs_info[seq_idx]['length']
         seq = '{:03d}'.format(seq_idx)
         logger('seq {} image results generating ...'.format(seq))
-        torch.cuda.empty_cache()
         dir_name = '_'.join((para.dataset, para.model, 'test'))
         save_dir = join(para.test_save_dir, dir_name, seq)
         os.makedirs(save_dir, exist_ok=True)
@@ -162,34 +153,32 @@ def _test_lmdb(para, logger, model, ds_type):
             for frame_idx in range(start, end):
                 code = '%03d_%08d' % (seq_idx, frame_idx)
                 code = code.encode()
-                img_blur = txn_blur.get(code)
-                img_blur = np.frombuffer(img_blur, dtype='uint8')
-                img_blur = normalize(img_blur.reshape(H, W, C), centralize=True, normalize=True)
-                img_gt = txn_gt.get(code)
-                img_gt = np.frombuffer(img_gt, dtype='uint8')
-                img_gt = normalize(img_gt.reshape(H, W, C), centralize=True, normalize=True)
-                input_seq.append(img_blur.transpose((2, 0, 1))[np.newaxis, :])
-                label_seq.append(img_gt.transpose((2, 0, 1))[np.newaxis, :])
+                blur_img = txn_blur.get(code)
+                blur_img = np.frombuffer(blur_img, dtype='uint8')
+                blur_img = blur_img.reshape(H, W, C).transpose((2, 0, 1))[np.newaxis, :]
+                gt_img = txn_gt.get(code)
+                gt_img = np.frombuffer(gt_img, dtype='uint8')
+                gt_img = gt_img.reshape(H, W, C)
+                input_seq.append(blur_img)
+                label_seq.append(gt_img)
             input_seq = np.concatenate(input_seq)[np.newaxis, :]
-            label_seq = np.concatenate(label_seq)[np.newaxis, :]
+            model.eval()
             with torch.no_grad():
-                input_seq = torch.from_numpy(input_seq).float().cuda()
-                label_seq = torch.from_numpy(label_seq).float().cuda()
+                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=True, normalize=True)
                 time_start = time.time()
-                output_seq = model([input_seq, label_seq]).squeeze(dim=0)
-                timer.update(time.time() - time_start, n=len(output_seq))
+                output_seq = model([input_seq, ]).squeeze(dim=0)
+                timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
-                blur_img = input_seq.squeeze()[frame_idx].squeeze()
-                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0))
-                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True).astype(np.uint8)
+                blur_img = input_seq.squeeze()[frame_idx]
+                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True)
+                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
                 blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))
-                gt_img = label_seq.squeeze()[frame_idx].squeeze()
-                gt_img = gt_img.detach().cpu().numpy().transpose((1, 2, 0))
-                gt_img = normalize_reverse(gt_img, centralize=True, normalize=True).astype(np.uint8)
+                gt_img = label_seq[frame_idx]
                 gt_img_path = join(save_dir, '{:08d}_gt.png'.format(frame_idx + start))
                 deblur_img = output_seq[frame_idx - para.past_frames]
-                deblur_img = deblur_img.detach().cpu().numpy().clip(0, 255).transpose((1, 2, 0))
-                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True).astype(np.uint8)
+                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True)
+                deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0))
+                deblur_img = np.clip(deblur_img, 0, 255).astype(np.uint8)
                 deblur_img_path = join(save_dir, '{:08d}_{}.png'.format(frame_idx + start, para.model.lower()))
                 cv2.imwrite(blur_img_path, blur_img)
                 cv2.imwrite(gt_img_path, gt_img)

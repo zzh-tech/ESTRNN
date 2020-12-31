@@ -18,10 +18,7 @@ class DeblurDataset(Dataset):
         self.datapath_gt = join(path, '{}_{}_gt'.format(ds_name, ds_type))
         with open(join(path, '{}_info_{}.pkl'.format(ds_name, ds_type)), 'rb') as f:
             self.seqs_info = pickle.load(f)
-        if ds_type == 'train':
-            self.transform = transforms.Compose([Crop(crop_size), Flip(), ToTensor()])
-        else:
-            self.transform = transforms.Compose([Crop(crop_size), ToTensor()])
+        self.transform = transforms.Compose([Crop(crop_size), Flip(), ToTensor()])
         self.frames = frames
         self.crop_h, self.crop_w = crop_size
         self.W = 1280
