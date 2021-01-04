@@ -12,7 +12,8 @@ from .utils import Crop, Flip, ToTensor, normalize
 
 
 class DeblurDataset(Dataset):
-    def __init__(self, path, frames, future_frames, past_frames, crop_size=(256, 256), ds_type='train'):
+    def __init__(self, path, frames, future_frames, past_frames, crop_size=(256, 256), ds_type='train', centralize=True,
+                 normalize=True):
         ds_name = 'gopro_ds'
         self.datapath_blur = join(path, '{}_{}'.format(ds_name, ds_type))
         self.datapath_gt = join(path, '{}_{}_gt'.format(ds_name, ds_type))
@@ -26,6 +27,8 @@ class DeblurDataset(Dataset):
         self.C = 3
         self.num_ff = future_frames
         self.num_pf = past_frames
+        self.normalize = normalize
+        self.centralize = centralize
         self.env_blur = lmdb.open(self.datapath_blur, map_size=1099511627776)
         self.env_gt = lmdb.open(self.datapath_gt, map_size=1099511627776)
         self.txn_blur = self.env_blur.begin()
@@ -45,9 +48,15 @@ class DeblurDataset(Dataset):
             else:
                 idx -= seq_length
 
+        top = random.randint(0, self.H - self.crop_h)
+        left = random.randint(0, self.W - self.crop_w)
+        flip_lr_flag = random.randint(0, 1)
+        flip_ud_flag = random.randint(0, 1)
+        sample = {'top': top, 'left': left, 'flip_lr': flip_lr_flag, 'flip_ud': flip_ud_flag}
+
         for i in range(self.frames):
             try:
-                blur_img, sharp_img = self.get_img(seq_idx, frame_idx + i)
+                blur_img, sharp_img = self.get_img(seq_idx, frame_idx + i, sample)
                 blur_imgs.append(blur_img)
                 sharp_imgs.append(sharp_img)
             except TypeError as err:
@@ -57,7 +66,7 @@ class DeblurDataset(Dataset):
         sharp_imgs = torch.cat(sharp_imgs[self.num_pf:self.frames - self.num_ff], dim=0)
         return blur_imgs, sharp_imgs
 
-    def get_img(self, seq_idx, frame_idx):
+    def get_img(self, seq_idx, frame_idx, sample):
         code = '%03d_%08d' % (seq_idx, frame_idx)
         code = code.encode()
         blur_img = self.txn_blur.get(code)
@@ -66,15 +75,11 @@ class DeblurDataset(Dataset):
         sharp_img = self.txn_gt.get(code)
         sharp_img = np.frombuffer(sharp_img, dtype='uint8')
         sharp_img = sharp_img.reshape(self.H, self.W, self.C)
-        top = random.randint(0, self.H - self.crop_h)
-        left = random.randint(0, self.W - self.crop_w)
-        flip_lr_flag = random.randint(0, 1)
-        flip_ud_flag = random.randint(0, 1)
-        sample = {'top': top, 'left': left, 'flip_lr': flip_lr_flag, 'flip_ud': flip_ud_flag, 'image': blur_img,
-                  'label': sharp_img}
+        sample['image'] = blur_img
+        sample['label'] = sharp_img
         sample = self.transform(sample)
-        blur_img = normalize(sample['image'], centralize=True, normalize=True)
-        sharp_img = normalize(sample['label'], centralize=True, normalize=True)
+        blur_img = normalize(sample['image'], centralize=self.centralize, normalize=self.normalize)
+        sharp_img = normalize(sample['label'], centralize=self.centralize, normalize=self.normalize)
 
         return blur_img, sharp_img
 
@@ -85,7 +90,8 @@ class DeblurDataset(Dataset):
 class Dataloader:
     def __init__(self, para, device_id, ds_type='train'):
         path = join(para.data_root, para.dataset)
-        dataset = DeblurDataset(path, para.frames, para.future_frames, para.past_frames, para.patch_size, ds_type)
+        dataset = DeblurDataset(path, para.frames, para.future_frames, para.past_frames, para.patch_size, ds_type,
+                                para.centralize, para.normalize)
         gpus = para.num_gpus
         bs = para.batch_size
         ds_len = len(dataset)

@@ -19,7 +19,8 @@ class DeblurDataset(Dataset):
                 path of images -> {'Blur': <path>, 'Sharp': <path>}
     """
 
-    def __init__(self, path, frames, future_frames, past_frames, crop_size=(256, 256), data_format='RGB'):
+    def __init__(self, path, frames, future_frames, past_frames, crop_size=(256, 256), data_format='RGB',
+                 centralize=True, normalize=True):
         assert frames - future_frames - past_frames >= 1
         self.frames = frames
         self.num_ff = future_frames
@@ -28,6 +29,8 @@ class DeblurDataset(Dataset):
         self.W = 640
         self.H = 480
         self.crop_h, self.crop_w = crop_size
+        self.normalize = normalize
+        self.centralize = centralize
         self.transform = transforms.Compose([Crop(crop_size), Flip(), ToTensor()])
         self._seq_length = 100
         self._samples = self._generate_samples(path, data_format)
@@ -53,20 +56,21 @@ class DeblurDataset(Dataset):
         return samples
 
     def __getitem__(self, item):
-        blur_imgs, sharp_imgs = [], []
-        for sample_dict in self._samples[item]:
-            blur_img, sharp_img = self._load_sample(sample_dict)
-            blur_imgs.append(blur_img)
-            sharp_imgs.append(sharp_img)
-        sharp_imgs = sharp_imgs[self.num_pf:self.frames - self.num_ff]
-        return [torch.cat(item, dim=0) for item in [blur_imgs, sharp_imgs]]
-
-    def _load_sample(self, sample_dict):
         top = random.randint(0, self.H - self.crop_h)
         left = random.randint(0, self.W - self.crop_w)
         flip_lr = random.randint(0, 1)
         flip_ud = random.randint(0, 1)
         sample = {'top': top, 'left': left, 'flip_lr': flip_lr, 'flip_ud': flip_ud}
+
+        blur_imgs, sharp_imgs = [], []
+        for sample_dict in self._samples[item]:
+            blur_img, sharp_img = self._load_sample(sample_dict, sample)
+            blur_imgs.append(blur_img)
+            sharp_imgs.append(sharp_img)
+        sharp_imgs = sharp_imgs[self.num_pf:self.frames - self.num_ff]
+        return [torch.cat(item, dim=0) for item in [blur_imgs, sharp_imgs]]
+
+    def _load_sample(self, sample_dict, sample):
         if self.data_format == 'RAW':
             sample['image'] = cv2.imread(sample_dict['Blur'], -1)[..., np.newaxis].astype(np.int32)
         else:
@@ -74,8 +78,8 @@ class DeblurDataset(Dataset):
         sample['label'] = cv2.imread(sample_dict['Sharp'])
         sample = self.transform(sample)
         val_range = 2.0 ** 8 - 1 if self.data_format == 'RGB' else 2.0 ** 16 - 1
-        blur_img = normalize(sample['image'], centralize=True, normalize=True, val_range=val_range)
-        sharp_img = normalize(sample['label'], centralize=True, normalize=True)
+        blur_img = normalize(sample['image'], centralize=self.centralize, normalize=self.normalize, val_range=val_range)
+        sharp_img = normalize(sample['label'], centralize=self.centralize, normalize=self.normalize)
 
         return blur_img, sharp_img
 
@@ -87,7 +91,8 @@ class Dataloader:
     def __init__(self, para, device_id, ds_type='train'):
         path = join(para.data_root, para.dataset, '{}_{}'.format(para.dataset, para.ds_config), ds_type)
         frames = para.frames
-        dataset = DeblurDataset(path, frames, para.future_frames, para.past_frames, para.patch_size, para.data_format)
+        dataset = DeblurDataset(path, frames, para.future_frames, para.past_frames, para.patch_size, para.data_format,
+                                para.centralize, para.normalize)
         gpus = para.num_gpus
         bs = para.batch_size
         ds_len = len(dataset)

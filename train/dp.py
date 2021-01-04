@@ -48,7 +48,7 @@ def process(para):
     # create measurement according to metrics
     metrics_name = para.metrics
     module = import_module('train.metrics')
-    metrics = getattr(module, metrics_name)(centralize=True, normalize=True).cuda()
+    metrics = getattr(module, metrics_name)(centralize=para.centralize, normalize=para.normalize).cuda()
 
     # create optimizer
     opt = Optimizer(para, model)

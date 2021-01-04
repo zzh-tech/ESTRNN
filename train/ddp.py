@@ -60,7 +60,7 @@ def dist_process(gpu, para):
     # create measurement metrics
     metrics_name = para.metrics
     module = import_module('train.metrics')
-    metrics = getattr(module, metrics_name)(centralize=True, normalize=True).cuda(rank)
+    metrics = getattr(module, metrics_name)(centralize=para.centralize, normalize=para.normalize).cuda(rank)
 
     # todo deprecate Optimizer class
     # create optimizer

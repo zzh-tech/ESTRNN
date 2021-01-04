@@ -72,19 +72,20 @@ def _test_torch(para, logger, model, ds_type):
             input_seq = np.concatenate(input_seq)[np.newaxis, :]
             model.eval()
             with torch.no_grad():
-                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=True, normalize=True)
+                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=para.centralize,
+                                      normalize=para.normalize)
                 time_start = time.time()
                 output_seq = model([input_seq, ]).squeeze(dim=0)
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
                 blur_img = input_seq.squeeze()[frame_idx]
-                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True)
+                blur_img = normalize_reverse(blur_img, centralize=para.centralize, normalize=para.normalize)
                 blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
                 blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))
                 gt_img = label_seq[frame_idx]
                 gt_img_path = join(save_dir, '{:08d}_gt.png'.format(frame_idx + start))
                 deblur_img = output_seq[frame_idx - para.past_frames]
-                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True)
+                deblur_img = normalize_reverse(deblur_img, centralize=para.centralize, normalize=para.normalize)
                 deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0))
                 deblur_img = np.clip(deblur_img, 0, 255).astype(np.uint8)
                 deblur_img_path = join(save_dir, '{:08d}_{}.png'.format(frame_idx + start, para.model.lower()))
@@ -164,19 +165,20 @@ def _test_lmdb(para, logger, model, ds_type):
             input_seq = np.concatenate(input_seq)[np.newaxis, :]
             model.eval()
             with torch.no_grad():
-                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=True, normalize=True)
+                input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=para.centralize,
+                                      normalize=para.normalize)
                 time_start = time.time()
                 output_seq = model([input_seq, ]).squeeze(dim=0)
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
                 blur_img = input_seq.squeeze()[frame_idx]
-                blur_img = normalize_reverse(blur_img, centralize=True, normalize=True)
+                blur_img = normalize_reverse(blur_img, centralize=para.centralize, normalize=para.normalize)
                 blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
                 blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))
                 gt_img = label_seq[frame_idx]
                 gt_img_path = join(save_dir, '{:08d}_gt.png'.format(frame_idx + start))
                 deblur_img = output_seq[frame_idx - para.past_frames]
-                deblur_img = normalize_reverse(deblur_img, centralize=True, normalize=True)
+                deblur_img = normalize_reverse(deblur_img, centralize=para.centralize, normalize=para.normalize)
                 deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0))
                 deblur_img = np.clip(deblur_img, 0, 255).astype(np.uint8)
                 deblur_img_path = join(save_dir, '{:08d}_{}.png'.format(frame_idx + start, para.model.lower()))
