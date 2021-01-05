@@ -48,6 +48,7 @@ def _test_torch(para, logger, model, ds_type):
     timer = AverageMeter()
     results_register = set()
     H, W = 480, 640
+    val_range = 2.0 ** 8 - 1 if para.data_format == 'RGB' else 2.0 ** 16 - 1
     dataset_path = join(para.data_root, para.dataset, '{}_{}'.format(para.dataset, para.ds_config), ds_type)
     seqs = sorted(os.listdir(dataset_path))
     seq_length = 100
@@ -65,7 +66,11 @@ def _test_torch(para, logger, model, ds_type):
             for frame_idx in range(start, end):
                 blur_img_path = join(dataset_path, seq, 'Blur', para.data_format, '{:08d}.{}'.format(frame_idx, suffix))
                 sharp_img_path = join(dataset_path, seq, 'Sharp', 'RGB', '{:08d}.{}'.format(frame_idx, 'png'))
-                blur_img = cv2.imread(blur_img_path).transpose(2, 0, 1)[np.newaxis, ...]
+                if para.data_format == 'RGB':
+                    blur_img = cv2.imread(blur_img_path).transpose(2, 0, 1)[np.newaxis, ...]
+                else:
+                    blur_img = cv2.imread(blur_img_path, -1)[..., np.newaxis].astype(np.int32)
+                    blur_img = blur_img.transpose(2, 0, 1)[np.newaxis, ...]
                 gt_img = cv2.imread(sharp_img_path)
                 input_seq.append(blur_img)
                 label_seq.append(gt_img)
@@ -73,12 +78,12 @@ def _test_torch(para, logger, model, ds_type):
             model.eval()
             with torch.no_grad():
                 input_seq = normalize(torch.from_numpy(input_seq).float().cuda(), centralize=para.centralize,
-                                      normalize=para.normalize)
+                                      normalize=para.normalize, val_range=val_range)
                 time_start = time.time()
                 output_seq = model([input_seq, ]).squeeze(dim=0)
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
-                blur_img = input_seq.squeeze()[frame_idx]
+                blur_img = input_seq.squeeze(dim=0)[frame_idx]
                 blur_img = normalize_reverse(blur_img, centralize=para.centralize, normalize=para.normalize)
                 blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
                 blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))

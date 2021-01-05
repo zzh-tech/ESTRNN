@@ -141,3 +141,25 @@ class RDNet(nn.Module):
         out = self.act(self.conv1x1(out))
         out = self.act(self.conv3x3(out))
         return out
+
+
+class SpaceToDepth(nn.Module):
+    """
+    Pixel Unshuffle
+    """
+
+    def __init__(self, block_size=4):
+        super().__init__()
+        assert block_size in {2, 4}, "Space2Depth only supports blocks size = 4 or 2"
+        self.block_size = block_size
+
+    def forward(self, x):
+        N, C, H, W = x.size()
+        S = self.block_size
+        x = x.view(N, C, H // S, S, W // S, S)  # (N, C, H//bs, bs, W//bs, bs)
+        x = x.permute(0, 3, 5, 1, 2, 4).contiguous()  # (N, bs, bs, C, H//bs, W//bs)
+        x = x.view(N, C * S * S, H // S, W // S)  # (N, C*bs^2, H//bs, W//bs)
+        return x
+
+    def extra_repr(self):
+        return f"block_size={self.block_size}"
