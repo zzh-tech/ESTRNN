@@ -48,7 +48,9 @@ def process(para):
     # create measurement according to metrics
     metrics_name = para.metrics
     module = import_module('train.metrics')
-    metrics = getattr(module, metrics_name)(centralize=para.centralize, normalize=para.normalize).cuda()
+    val_range = 2.0 ** 8 - 1 if para.data_format == 'RGB' else 2.0 ** 16 - 1
+    metrics = getattr(module, metrics_name)(centralize=para.centralize, normalize=para.normalize,
+                                            val_range=val_range).cuda()
 
     # create optimizer
     opt = Optimizer(para, model)

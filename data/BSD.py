@@ -45,7 +45,7 @@ class DeblurDataset(Dataset):
                 suffix = 'png' if data_format == 'RGB' else 'tiff'
                 sample = dict()
                 sample['Blur'] = join(dataset_path, seq, 'Blur', data_format, '{:08d}.{}'.format(frame, suffix))
-                sample['Sharp'] = join(dataset_path, seq, 'Sharp', 'RGB', '{:08d}.{}'.format(frame, 'png'))
+                sample['Sharp'] = join(dataset_path, seq, 'Sharp', data_format, '{:08d}.{}'.format(frame, suffix))
                 records[seq].append(sample)
         for seq_records in records.values():
             temp_length = len(seq_records) - (self.frames - 1)
@@ -71,15 +71,16 @@ class DeblurDataset(Dataset):
         return [torch.cat(item, dim=0) for item in [blur_imgs, sharp_imgs]]
 
     def _load_sample(self, sample_dict, sample):
-        if self.data_format == 'RAW':
-            sample['image'] = cv2.imread(sample_dict['Blur'], -1)[..., np.newaxis].astype(np.int32)
-        else:
+        if self.data_format == 'RGB':
             sample['image'] = cv2.imread(sample_dict['Blur'])
-        sample['label'] = cv2.imread(sample_dict['Sharp'])
+            sample['label'] = cv2.imread(sample_dict['Sharp'])
+        elif self.data_format == 'RAW':
+            sample['image'] = cv2.imread(sample_dict['Blur'], -1)[..., np.newaxis].astype(np.int32)
+            sample['label'] = cv2.imread(sample_dict['Sharp'], -1)[..., np.newaxis].astype(np.int32)
         sample = self.transform(sample)
         val_range = 2.0 ** 8 - 1 if self.data_format == 'RGB' else 2.0 ** 16 - 1
         blur_img = normalize(sample['image'], centralize=self.centralize, normalize=self.normalize, val_range=val_range)
-        sharp_img = normalize(sample['label'], centralize=self.centralize, normalize=self.normalize)
+        sharp_img = normalize(sample['label'], centralize=self.centralize, normalize=self.normalize, val_range=val_range)
 
         return blur_img, sharp_img
 

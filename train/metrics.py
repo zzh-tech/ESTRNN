@@ -23,23 +23,21 @@ def im2tensor(image, cent=1., factor=255. / 2.):
                         [:, :, :, np.newaxis].transpose((3, 2, 0, 1)))
 
 
-# input range must be 0~255
-def psnr_calculate(x, y):
+def psnr_calculate(x, y, val_range=255.0):
     # x,y size (h,w,c)
-    assert len(x.shape) == 3
-    assert len(y.shape) == 3
+    # assert len(x.shape) == 3
+    # assert len(y.shape) == 3
     x = x.astype(np.float)
     y = y.astype(np.float)
-    diff = (x - y) / 255.0
+    diff = (x - y) / val_range
     mse = np.mean(diff ** 2)
     psnr = -10 * np.log10(mse)
     return psnr
 
 
-# input range must be 0~255
-def ssim_calculate(x, y):
+def ssim_calculate(x, y, val_range=255.0):
     ssim = compare_ssim(y, x, multichannel=True, gaussian_weights=True, sigma=1.5, use_sample_covariance=False,
-                        data_range=255)
+                        data_range=val_range)
     return ssim
 
 
@@ -58,14 +56,14 @@ def ssim_calculate(x, y):
 
 
 class PSNR(_Loss):
-    def __init__(self, centralize=True, normalize=True):
+    def __init__(self, centralize=True, normalize=True, val_range=255.):
         super(PSNR, self).__init__()
         self.centralize = centralize
         self.normalize = normalize
-        self.val_range = 255
+        self.val_range = val_range
 
     def _quantize(self, img):
-        img = normalize_reverse(img, centralize=self.centralize, normalize=self.normalize)
+        img = normalize_reverse(img, centralize=self.centralize, normalize=self.normalize, val_range=self.val_range)
         img = img.clamp(0, self.val_range).round()
         return img
 

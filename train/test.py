@@ -65,13 +65,16 @@ def _test_torch(para, logger, model, ds_type):
             label_seq = []
             for frame_idx in range(start, end):
                 blur_img_path = join(dataset_path, seq, 'Blur', para.data_format, '{:08d}.{}'.format(frame_idx, suffix))
-                sharp_img_path = join(dataset_path, seq, 'Sharp', 'RGB', '{:08d}.{}'.format(frame_idx, 'png'))
+                sharp_img_path = join(dataset_path, seq, 'Sharp', para.data_format,
+                                      '{:08d}.{}'.format(frame_idx, suffix))
                 if para.data_format == 'RGB':
                     blur_img = cv2.imread(blur_img_path).transpose(2, 0, 1)[np.newaxis, ...]
+                    gt_img = cv2.imread(sharp_img_path)
+
                 else:
                     blur_img = cv2.imread(blur_img_path, -1)[..., np.newaxis].astype(np.int32)
                     blur_img = blur_img.transpose(2, 0, 1)[np.newaxis, ...]
-                gt_img = cv2.imread(sharp_img_path)
+                    gt_img = cv2.imread(sharp_img_path, -1).astype(np.uint16)
                 input_seq.append(blur_img)
                 label_seq.append(gt_img)
             input_seq = np.concatenate(input_seq)[np.newaxis, :]
@@ -84,23 +87,28 @@ def _test_torch(para, logger, model, ds_type):
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
                 blur_img = input_seq.squeeze(dim=0)[frame_idx]
-                blur_img = normalize_reverse(blur_img, centralize=para.centralize, normalize=para.normalize)
-                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
-                blur_img_path = join(save_dir, '{:08d}_input.png'.format(frame_idx + start))
+                blur_img = normalize_reverse(blur_img, centralize=para.centralize, normalize=para.normalize,
+                                             val_range=val_range)
+                blur_img = blur_img.detach().cpu().numpy().transpose((1, 2, 0)).squeeze()
+                blur_img = blur_img.astype(np.uint8) if para.data_format == 'RGB' else blur_img.astype(np.uint16)
+                blur_img_path = join(save_dir, '{:08d}_input.{}'.format(frame_idx + start, suffix))
                 gt_img = label_seq[frame_idx]
-                gt_img_path = join(save_dir, '{:08d}_gt.png'.format(frame_idx + start))
+                gt_img_path = join(save_dir, '{:08d}_gt.{}'.format(frame_idx + start, suffix))
                 deblur_img = output_seq[frame_idx - para.past_frames]
-                deblur_img = normalize_reverse(deblur_img, centralize=para.centralize, normalize=para.normalize)
-                deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0))
-                deblur_img = np.clip(deblur_img, 0, 255).astype(np.uint8)
-                deblur_img_path = join(save_dir, '{:08d}_{}.png'.format(frame_idx + start, para.model.lower()))
+                deblur_img = normalize_reverse(deblur_img, centralize=para.centralize, normalize=para.normalize,
+                                               val_range=val_range)
+                deblur_img = deblur_img.detach().cpu().numpy().transpose((1, 2, 0)).squeeze()
+                deblur_img = np.clip(deblur_img, 0, val_range)
+                deblur_img = deblur_img.astype(np.uint8) if para.data_format == 'RGB' else deblur_img.astype(np.uint16)
+                deblur_img_path = join(save_dir, '{:08d}_{}.{}'.format(frame_idx + start, para.model.lower(), suffix))
+                print(blur_img_path, blur_img.shape)
                 cv2.imwrite(blur_img_path, blur_img)
                 cv2.imwrite(gt_img_path, gt_img)
                 cv2.imwrite(deblur_img_path, deblur_img)
                 if deblur_img_path not in results_register:
                     results_register.add(deblur_img_path)
-                    PSNR.update(psnr_calculate(deblur_img, gt_img))
-                    SSIM.update(ssim_calculate(deblur_img, gt_img))
+                    PSNR.update(psnr_calculate(deblur_img, gt_img, val_range=val_range))
+                    SSIM.update(ssim_calculate(deblur_img, gt_img, val_range=val_range))
 
             if end == seq_length:
                 break
@@ -112,6 +120,8 @@ def _test_torch(para, logger, model, ds_type):
                     start = end - para.test_frames
 
         if para.video:
+            if para.data_format != 'RGB':
+                continue
             logger('seq {} video result generating ...'.format(seq))
             marks = ['Input', para.model, 'GT']
             path = dirname(save_dir)

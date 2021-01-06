@@ -131,8 +131,10 @@ class RDBCell(nn.Module):
         self.n_feats = para.n_features
         self.n_blocks = para.n_blocks
         self.pixel_unshuffle = SpaceToDepth(block_size=2)
-        self.F_B0 = conv5x5(4, 2 * self.n_feats, stride=1)
-        self.F_B1 = RDB(in_channels=2 * self.n_feats, growthRate=2 * self.n_feats, num_layer=3, activation=self.activation)
+        self.downsampling = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.F_B0 = conv5x5(4 + 1, 2 * self.n_feats, stride=1)
+        self.F_B1 = RDB(in_channels=2 * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
+                           activation=self.activation)
         self.F_B2 = RDB_DS(in_channels=2 * self.n_feats, growthRate=int(self.n_feats * 3 / 2), num_layer=3,
                            activation=self.activation)
         self.F_R = RDNet(in_channels=(1 + 4) * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
@@ -145,7 +147,7 @@ class RDBCell(nn.Module):
         )
 
     def forward(self, x, s_last):
-        out = self.pixel_unshuffle(x)
+        out = torch.cat((self.downsampling(x), self.pixel_unshuffle(x)), dim=1)
         out = self.F_B0(out)
         out = self.F_B1(out)
         out = self.F_B2(out)
@@ -169,7 +171,7 @@ class Reconstructor(nn.Module):
             nn.ConvTranspose2d((5 * self.n_feats) * (self.related_f), 2 * self.n_feats, kernel_size=3, stride=2,
                                padding=1, output_padding=1),
             nn.ConvTranspose2d(2 * self.n_feats, self.n_feats, kernel_size=3, stride=2, padding=1, output_padding=1),
-            conv5x5(self.n_feats, 3, stride=1)
+            conv5x5(self.n_feats, 1, stride=1)
         )
 
     def forward(self, x):
