@@ -28,7 +28,7 @@ class Parameter:
         self.parser.add_argument('--dataset', type=str, default='BSD', help='BSD, gopro_ds_lmdb, reds_lmdb')
         self.parser.add_argument('--save_dir', type=str, default='./experiment/',
                                  help='directory to save logs of experiments')
-        self.parser.add_argument('--frames', type=int, default=10, help='# of frames of subsequence')
+        self.parser.add_argument('--frames', type=int, default=8, help='# of frames of subsequence')
         self.parser.add_argument('--ds_config', type=str, default='2ms16ms', help='1ms8ms, 2ms16ms or 3ms24ms')
         self.parser.add_argument('--data_format', type=str, default='RGB', help='RGB or RAW')
         self.parser.add_argument('--patch_size', type=int, nargs='*', default=[256, 256])

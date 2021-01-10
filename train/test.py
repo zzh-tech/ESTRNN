@@ -101,7 +101,6 @@ def _test_torch(para, logger, model, ds_type):
                 deblur_img = np.clip(deblur_img, 0, val_range)
                 deblur_img = deblur_img.astype(np.uint8) if para.data_format == 'RGB' else deblur_img.astype(np.uint16)
                 deblur_img_path = join(save_dir, '{:08d}_{}.{}'.format(frame_idx + start, para.model.lower(), suffix))
-                print(blur_img_path, blur_img.shape)
                 cv2.imwrite(blur_img_path, blur_img)
                 cv2.imwrite(gt_img_path, gt_img)
                 cv2.imwrite(deblur_img_path, deblur_img)
