@@ -47,10 +47,15 @@ class RNNCell(nn.Module):
 
 
 class Model(nn.Module):
+    """
+    Recurrent Neural Networks with Intra-Frame Iterations for Video Deblurring (IFIRNN, CVPR2019)
+    """
+
     def __init__(self, para):
         super(Model, self).__init__()
         self.para = para
         self.ratio = 4
+        # C2H3
         self.iters = 3
         self.rnncell0 = RNNCell(dual_cell=True)
         self.rnncell1 = RNNCell(dual_cell=False)

@@ -1,5 +1,8 @@
 import torch
 import torch.nn as nn
+from detectron2.layers import ModulatedDeformConv
+from torch.nn import init as init
+from torch.nn.modules.batchnorm import _BatchNorm
 
 
 def conv1x1(in_channels, out_channels, stride=1):
@@ -163,3 +166,94 @@ class SpaceToDepth(nn.Module):
 
     def extra_repr(self):
         return f"block_size={self.block_size}"
+
+
+class ModulatedDeformLayer(nn.Module):
+    """
+    Modulated Deformable Convolution (v2)
+    """
+
+    def __init__(self, in_chs, out_chs, kernel_size=3, padding=1, stride=1, deformable_groups=1, activation='relu'):
+        super(ModulatedDeformLayer, self).__init__()
+        assert isinstance(kernel_size, (int, list, tuple))
+        self.deform_offset = conv3x3(in_chs, (3 * kernel_size ** 2) * deformable_groups)
+        # self.act = actFunc(activation)
+        self.deform = ModulatedDeformConv(
+            in_chs,
+            out_chs,
+            kernel_size,
+            stride=padding,
+            padding=stride,
+            deformable_groups=deformable_groups
+        )
+
+    def forward(self, x, feat):
+        offset_mask = self.deform_offset(feat)
+        offset_x, offset_y, mask = torch.chunk(offset_mask, 3, dim=1)
+        offset = torch.cat((offset_x, offset_y), dim=1)
+        mask = mask.sigmoid()
+        out = self.deform(x, offset, mask)
+        # out = self.act(out)
+        return out
+
+
+@torch.no_grad()
+def default_init_weights(module_list, scale=1, bias_fill=0, **kwargs):
+    """Initialize network weights.
+
+    Args:
+        module_list (list[nn.Module] | nn.Module): Modules to be initialized.
+        scale (float): Scale initialized weights, especially for residual
+            blocks. Default: 1.
+        bias_fill (float): The value to fill bias. Default: 0
+        kwargs (dict): Other arguments for initialization function.
+    """
+    if not isinstance(module_list, list):
+        module_list = [module_list]
+    for module in module_list:
+        for m in module.modules():
+            if isinstance(m, nn.Conv2d):
+                init.kaiming_normal_(m.weight, **kwargs)
+                m.weight.data *= scale
+                if m.bias is not None:
+                    m.bias.data.fill_(bias_fill)
+            elif isinstance(m, nn.Linear):
+                init.kaiming_normal_(m.weight, **kwargs)
+                m.weight.data *= scale
+                if m.bias is not None:
+                    m.bias.data.fill_(bias_fill)
+            elif isinstance(m, _BatchNorm):
+                init.constant_(m.weight, 1)
+                if m.bias is not None:
+                    m.bias.data.fill_(bias_fill)
+
+
+class ResidualBlockNoBN(nn.Module):
+    """Residual block without BN.
+
+    It has a style of:
+        ---Conv-ReLU-Conv-+-
+         |________________|
+
+    Args:
+        num_feat (int): Channel number of intermediate features.
+            Default: 64.
+        res_scale (float): Residual scale. Default: 1.
+        pytorch_init (bool): If set to True, use pytorch default init,
+            otherwise, use default_init_weights. Default: False.
+    """
+
+    def __init__(self, num_feat=64, res_scale=1, pytorch_init=False):
+        super(ResidualBlockNoBN, self).__init__()
+        self.res_scale = res_scale
+        self.conv1 = nn.Conv2d(num_feat, num_feat, 3, 1, 1, bias=True)
+        self.conv2 = nn.Conv2d(num_feat, num_feat, 3, 1, 1, bias=True)
+        self.relu = nn.ReLU(inplace=True)
+
+        if not pytorch_init:
+            default_init_weights([self.conv1, self.conv2], 0.1)
+
+    def forward(self, x):
+        identity = x
+        out = self.conv2(self.relu(self.conv1(x)))
+        return identity + out * self.res_scale

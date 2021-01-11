@@ -134,7 +134,7 @@ class RDBCell(nn.Module):
         self.downsampling = nn.AvgPool2d(kernel_size=2, stride=2)
         self.F_B0 = conv5x5(4 + 1, 2 * self.n_feats, stride=1)
         self.F_B1 = RDB(in_channels=2 * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
-                           activation=self.activation)
+                        activation=self.activation)
         self.F_B2 = RDB_DS(in_channels=2 * self.n_feats, growthRate=int(self.n_feats * 3 / 2), num_layer=3,
                            activation=self.activation)
         self.F_R = RDNet(in_channels=(1 + 4) * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
@@ -178,8 +178,10 @@ class Reconstructor(nn.Module):
         return self.model(x)
 
 
-# Efficient saptio-temporal recurrent neural network for RAW images (ESTRNN-RAW)
 class Model(nn.Module):
+    """
+    Efficient saptio-temporal recurrent neural network for RAW images (ESTRNN-RAW)
+    """
     def __init__(self, para):
         super(Model, self).__init__()
         self.para = para

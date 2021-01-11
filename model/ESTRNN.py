@@ -174,8 +174,10 @@ class Reconstructor(nn.Module):
         return self.model(x)
 
 
-# Efficient saptio-temporal recurrent neural network (ESTRNN)
 class Model(nn.Module):
+    """
+    Efficient saptio-temporal recurrent neural network (ESTRNN, ECCV2020)
+    """
     def __init__(self, para):
         super(Model, self).__init__()
         self.para = para
