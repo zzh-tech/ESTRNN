@@ -17,6 +17,10 @@ def conv5x5(in_channels, out_channels, stride=1):
     return nn.Conv2d(in_channels, out_channels, kernel_size=5, stride=stride, padding=2, bias=True)
 
 
+def deconv4x4(in_channels, out_channels):
+    return nn.ConvTranspose2d(in_channels, out_channels, kernel_size=4, stride=2, padding=1)
+
+
 def actFunc(act, *args, **kwargs):
     act = act.lower()
     if act == 'relu':
