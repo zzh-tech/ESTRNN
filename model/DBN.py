@@ -163,7 +163,7 @@ class Model(nn.Module):
             out_U3 = F.relu(out_U3 + out_F0)
             out_F6_1 = self.F6_1(out_U3)
             out_F6_2 = self.F6_2(out_F6_1)
-            out_F6_2 = torch.sigmoid(out_F6_2 + _x[:, (num_subframes // 2) * c:(num_subframes // 2) * c + c])
+            out_F6_2 = out_F6_2 + _x[:, (num_subframes // 2) * c:(num_subframes // 2) * c + c]
             out = out_F6_2.unsqueeze(dim=1)
             outputs.append(out)
         outputs = torch.cat(outputs, dim=1)
