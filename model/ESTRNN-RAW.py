@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from thop import profile
 
 from .arches import conv1x1, conv3x3, conv5x5, actFunc, SpaceToDepth
+from .attention import CBAM
 
 
 # Dense layer
@@ -130,12 +131,18 @@ class RDBCell(nn.Module):
         self.activation = para.activation
         self.n_feats = para.n_features
         self.n_blocks = para.n_blocks
-        self.pixel_unshuffle = SpaceToDepth(block_size=2)
-        self.downsampling = nn.AvgPool2d(kernel_size=2, stride=2)
-        self.F_B0 = conv5x5(4 + 1, 2 * self.n_feats, stride=1)
-        self.F_B1 = RDB(in_channels=2 * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
-                        activation=self.activation)
-        self.F_B2 = RDB_DS(in_channels=2 * self.n_feats, growthRate=int(self.n_feats * 3 / 2), num_layer=3,
+        self.pixel_unshuffle = nn.Sequential(SpaceToDepth(block_size=2), conv1x1(in_channels=4, out_channels=4),
+                                             actFunc(act=self.activation))
+        self.downsampling = nn.Sequential(conv5x5(in_channels=1, out_channels=4, stride=2),
+                                          actFunc(act=self.activation))
+        self.F_B0 = nn.Sequential(conv5x5(2 * 4, 2 * self.n_feats, stride=1), actFunc(act=self.activation))
+        self.cbam = CBAM(2 * self.n_feats, reduction_ratio=4)
+        self.F_B1 = nn.Sequential(RDB(in_channels=2 * self.n_feats, growthRate=self.n_feats, num_layer=3,
+                                      activation=self.activation),
+                                  RDB(in_channels=2 * self.n_feats, growthRate=int(self.n_feats * 3 / 2), num_layer=3,
+                                      activation=self.activation)
+                                  )
+        self.F_B2 = RDB_DS(in_channels=2 * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
                            activation=self.activation)
         self.F_R = RDNet(in_channels=(1 + 4) * self.n_feats, growthRate=2 * self.n_feats, num_layer=3,
                          num_blocks=self.n_blocks, activation=self.activation)  # in: 80
@@ -149,6 +156,7 @@ class RDBCell(nn.Module):
     def forward(self, x, s_last):
         out = torch.cat((self.downsampling(x), self.pixel_unshuffle(x)), dim=1)
         out = self.F_B0(out)
+        out = self.cbam(out)
         out = self.F_B1(out)
         out = self.F_B2(out)
         out = torch.cat([out, s_last], dim=1)
@@ -182,6 +190,7 @@ class Model(nn.Module):
     """
     Efficient saptio-temporal recurrent neural network for RAW images (ESTRNN-RAW)
     """
+
     def __init__(self, para):
         super(Model, self).__init__()
         self.para = para

@@ -52,6 +52,7 @@ def _test_torch(para, logger, model, ds_type):
     dataset_path = join(para.data_root, para.dataset, '{}_{}'.format(para.dataset, para.ds_config), ds_type)
     seqs = sorted(os.listdir(dataset_path))
     seq_length = 100
+    # seq_length = 150
     for seq in seqs:
         logger('seq {} image results generating ...'.format(seq))
         dir_name = '_'.join((para.dataset, para.model, 'test'))

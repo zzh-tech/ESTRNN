@@ -36,7 +36,7 @@ class Parameter:
         # model parameters
         self.parser.add_argument('--model', type=str, default='ESTRNN', help='type of model to construct')
         self.parser.add_argument('--n_features', type=int, default=16, help='base # of channels for Conv')
-        self.parser.add_argument('--n_blocks', type=int, default=12, help='# of blocks in middle part of the model')
+        self.parser.add_argument('--n_blocks', type=int, default=15, help='# of blocks in middle part of the model')
         self.parser.add_argument('--future_frames', type=int, default=2, help='use # of future frames')
         self.parser.add_argument('--past_frames', type=int, default=2, help='use # of past frames')
         self.parser.add_argument('--activation', type=str, default='gelu', help='activation function')
