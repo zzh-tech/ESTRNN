@@ -6,6 +6,9 @@ from thop import profile
 
 
 class Model(nn.Module):
+    """
+    Deep Video Deblurring for Hand-held Cameras (DBN, CVPR2017)
+    """
     def __init__(self, para):
         super(Model, self).__init__()
         self.para = para

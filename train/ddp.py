@@ -151,6 +151,8 @@ def dist_train(train_loader, model, criterion, metrics, opt, epoch, para, logger
 
         # todo merge this part with model class
         losses = criterion(outputs, labels)
+        if isinstance(outputs, (list, tuple)):
+            outputs = outputs[0]
         measure = metrics(outputs.detach(), labels)
 
         # reduce loss and measurement between GPUs
@@ -230,6 +232,8 @@ def dist_valid(valid_loader, model, criterion, metrics, epoch, para, logger):
             outputs = model(iter_samples)
 
             losses = criterion(outputs, labels, valid_flag=True)
+            if isinstance(outputs, (list, tuple)):
+                outputs = outputs[0]
             measure = metrics(outputs.detach(), labels)
 
             for key in losses_name:

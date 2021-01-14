@@ -85,6 +85,8 @@ def _test_torch(para, logger, model, ds_type):
                                       normalize=para.normalize, val_range=val_range)
                 time_start = time.time()
                 output_seq = model([input_seq, ]).squeeze(dim=0)
+                if isinstance(output_seq, (list, tuple)):
+                    output_seq = output_seq[0]
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
                 blur_img = input_seq.squeeze(dim=0)[frame_idx]
@@ -184,6 +186,8 @@ def _test_lmdb(para, logger, model, ds_type):
                                       normalize=para.normalize)
                 time_start = time.time()
                 output_seq = model([input_seq, ]).squeeze(dim=0)
+                if isinstance(output_seq, (list, tuple)):
+                    output_seq = output_seq[0]
                 timer.update((time.time() - time_start) / len(output_seq), n=len(output_seq))
             for frame_idx in range(para.past_frames, end - start - para.future_frames):
                 blur_img = input_seq.squeeze()[frame_idx]

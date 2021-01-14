@@ -6,6 +6,7 @@ from importlib import import_module
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from data import Data
 from model import Model
 from torch.nn.utils import clip_grad_norm_
@@ -131,8 +132,9 @@ def train(train_loader, model, criterion, metrics, opt, epoch, para, logger):
         labels = iter_samples[1]
         outputs = model(iter_samples)
 
-        # todo merge this part with model class
         losses = criterion(outputs, labels)
+        if isinstance(outputs, (list, tuple)):
+            outputs = outputs[0]
         measure = metrics(outputs.detach(), labels)
 
         # record value of losses and measurements
@@ -206,6 +208,8 @@ def valid(valid_loader, model, criterion, metrics, epoch, para, logger):
             outputs = model(iter_samples)
 
             losses = criterion(outputs, labels, valid_flag=True)
+            if isinstance(outputs, (list, tuple)):
+                outputs = outputs[0]
             measure = metrics(outputs.detach(), labels)
             for key in losses_name:
                 losses_meter[key].update(losses[key].detach().item(), inputs.size(0))

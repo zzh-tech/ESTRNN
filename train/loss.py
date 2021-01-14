@@ -265,7 +265,7 @@ class Loss(nn.Module):
             loss_fn = eval('{}(para)'.format(loss))
             self.losses.append(loss_fn)
 
-    def forward(self, x, y, valid_flag=False):
+    def _forward_single(self, x, y, valid_flag=False):
         if len(x.shape) == 5:
             b, n, c, h, w = x.shape
             x = x.reshape(b * n, c, h, w)
@@ -285,3 +285,32 @@ class Loss(nn.Module):
         losses['all'] = loss_all
 
         return losses
+
+    def _forward_list(self, x, y, valid_flag=False):
+        assert len(x) == len(y)
+        scales = len(x)
+        losses = None
+        for i in range(scales):
+            temp_losses = self._forward_single(x[i], y[i], valid_flag)
+            if losses is None:
+                losses = temp_losses
+            else:
+                for key in losses.keys():
+                    losses[key] += temp_losses[key]
+        return losses
+
+    def forward(self, x, y, valid_flag=False):
+        if isinstance(x, (list, tuple)):
+            B, N, C, H, W = y.shape
+            _y = []
+            _y.append(y)
+            y = y.reshape(B, N * C, H, W)
+            _y.append(
+                F.interpolate(y, size=(H // 2, W // 2), mode='bilinear', align_corners=False).reshape(B, N, C, H // 2,
+                                                                                                      W // 2))
+            _y.append(
+                F.interpolate(y, size=(H // 4, W // 4), mode='bilinear', align_corners=False).reshape(B, N, C, H // 4,
+                                                                                                      W // 4))
+            return self._forward_list(x, _y, valid_flag)
+        else:
+            return self._forward_single(x, y, valid_flag)
