@@ -46,7 +46,7 @@ The configurations of the new BSD dataset are as below:
 
 Please download and unzip the dataset file for each benchmark.
 
-- [BSD](https://drive.google.com/file/d/1oBFvNxk6wn8SvioLGuqp43D8DtcQjItq/view?usp=sharing)
+- [BSD](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)
 - [GOPRO-DS](https://drive.google.com/file/d/1Tni2gZzI_Hd03Msc8Rrxl5JklznqO9AG/view?usp=sharing)
 - [REDS](https://drive.google.com/file/d/1wMOtIqmnNfXqe0_-Xq0Xj6WMspCaEgRR/view?usp=sharing)
 
@@ -63,6 +63,7 @@ You can also tune the hyper parameters such as batch size, learning rate, epoch 
 python main.py --lr 1e-4 --batch_size 4 --num_gpus 2 --trainer_mode ddp
 ```
 
+If you want to train on your own dataset, please refer to "*/data/how_to_make_dataset_file.ipynb*".
 
 ## Citing
 
