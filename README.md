@@ -39,8 +39,11 @@ We have collected a new [BSD dataset](https://drive.google.com/file/d/1oBFvNxk6w
 
 The configurations of the new BSD dataset are as below:
 
-<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="600"/>
+<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="450"/>
 
+Results on different setups of BSD:
+
+<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/results_on_bsd.png" alt="bsd_config" width="600"/>
 
 ## Training
 
