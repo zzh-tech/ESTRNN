@@ -45,6 +45,16 @@ Results on different setups of BSD:
 
 <img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/results_on_bsd.png" alt="bsd_config" width="600"/>
 
+Pretrained models for different setups:
+
+Please download [checkpoints](https://drive.google.com/file/d/1n39u16UP5FUe04NDK-rpiBQtjUHibyRf/view?usp=sharing) and unzip it under the main directory.
+
+Example command to run a pre-trained model:
+
+```bash
+python main.py --test_only --test_checkpoint ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar --ds_config 3ms24ms --video
+```
+
 ## Training
 
 Please download and unzip the dataset file for each benchmark.
