@@ -1,8 +1,9 @@
-# ESTRNN
+# ESTRNN & BSD
 [Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)  
 
 by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
+This work presents an efficient RNN-based model and the first real-world dataset for video deblurring :)
 
 ## Results
 
@@ -32,7 +33,7 @@ by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
 ## Beam-Splitter Deblurring Dataset (BSD)
 
-We have collected a new [BSD dataset](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
+We have collected a new real-world video deblurring dataset ([BSD](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
 
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_system.png)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_demo.gif)
