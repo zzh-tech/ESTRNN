@@ -1,5 +1,9 @@
 # ESTRNN & BSD
-[Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)  
+Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)
+
+[Journal version (under review; new BSD dataset)](https://arxiv.org/abs/2106.16028)
+
+[Conference version (old BSD dataset)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf) 
 
 by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
@@ -92,4 +96,14 @@ If you use any part of our code, or ESTRNN and BSD are useful for your research,
   year={2020},
   organization={Springer}
 }
+
+@misc{zhong2021efficient,
+      title={Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring}, 
+      author={Zhihang Zhong and Ye Gao and Yinqiang Zheng and Bo Zheng and Imari Sato},
+      year={2021},
+      eprint={2106.16028},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
 ```
