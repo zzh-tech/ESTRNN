@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-# from detectron2.layers import ModulatedDeformConv
+from detectron2.layers import ModulatedDeformConv
 from torch.nn import init as init
 from torch.nn.modules.batchnorm import _BatchNorm
 
@@ -214,33 +214,33 @@ class CLSTM_cell(nn.Module):
         return (torch.zeros(batch_size, self.num_features, shape[0], shape[1]).cuda(),
                 torch.zeros(batch_size, self.num_features, shape[0], shape[1]).cuda())
 
-# class ModulatedDeformLayer(nn.Module):
-#     """
-#     Modulated Deformable Convolution (v2)
-#     """
-#
-#     def __init__(self, in_chs, out_chs, kernel_size=3, padding=1, stride=1, deformable_groups=1, activation='relu'):
-#         super(ModulatedDeformLayer, self).__init__()
-#         assert isinstance(kernel_size, (int, list, tuple))
-#         self.deform_offset = conv3x3(in_chs, (3 * kernel_size ** 2) * deformable_groups)
-#         # self.act = actFunc(activation)
-#         self.deform = ModulatedDeformConv(
-#             in_chs,
-#             out_chs,
-#             kernel_size,
-#             stride=padding,
-#             padding=stride,
-#             deformable_groups=deformable_groups
-#         )
-#
-#     def forward(self, x, feat):
-#         offset_mask = self.deform_offset(feat)
-#         offset_x, offset_y, mask = torch.chunk(offset_mask, 3, dim=1)
-#         offset = torch.cat((offset_x, offset_y), dim=1)
-#         mask = mask.sigmoid()
-#         out = self.deform(x, offset, mask)
-#         # out = self.act(out)
-#         return out
+class ModulatedDeformLayer(nn.Module):
+    """
+    Modulated Deformable Convolution (v2)
+    """
+
+    def __init__(self, in_chs, out_chs, kernel_size=3, padding=1, stride=1, deformable_groups=1, activation='relu'):
+        super(ModulatedDeformLayer, self).__init__()
+        assert isinstance(kernel_size, (int, list, tuple))
+        self.deform_offset = conv3x3(in_chs, (3 * kernel_size ** 2) * deformable_groups)
+        # self.act = actFunc(activation)
+        self.deform = ModulatedDeformConv(
+            in_chs,
+            out_chs,
+            kernel_size,
+            stride=padding,
+            padding=stride,
+            deformable_groups=deformable_groups
+        )
+
+    def forward(self, x, feat):
+        offset_mask = self.deform_offset(feat)
+        offset_x, offset_y, mask = torch.chunk(offset_mask, 3, dim=1)
+        offset = torch.cat((offset_x, offset_y), dim=1)
+        mask = mask.sigmoid()
+        out = self.deform(x, offset, mask)
+        # out = self.act(out)
+        return out
 #
 #
 # @torch.no_grad()

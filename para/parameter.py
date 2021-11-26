@@ -40,6 +40,7 @@ class Parameter:
         self.parser.add_argument('--future_frames', type=int, default=2, help='use # of future frames')
         self.parser.add_argument('--past_frames', type=int, default=2, help='use # of past frames')
         self.parser.add_argument('--activation', type=str, default='gelu', help='activation function')
+        self.parser.add_argument('--align', action='store_true', help='whether use deformable conv to align feature')
 
         # loss parameters
         self.parser.add_argument('--loss', type=str, default='1*L1_Charbonnier_loss_color',

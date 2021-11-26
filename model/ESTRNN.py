@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from thop import profile
 
-from .arches import conv1x1, conv3x3, conv5x5, actFunc
+from .arches import conv1x1, conv3x3, conv5x5, actFunc, ModulatedDeformLayer
 
 
 # Dense layer
@@ -122,6 +122,41 @@ class GSA(nn.Module):
 
         return out
 
+# Global spatio-temporal attention module with deformable alignment
+class DGSA(nn.Module):
+    def __init__(self, para):
+        super(DGSA, self).__init__()
+        self.n_feats = para.n_features
+        self.center = para.past_frames
+        self.num_ff = para.future_frames
+        self.num_fb = para.past_frames
+        self.related_f = self.num_ff + 1 + self.num_fb
+        # out channel: 160
+        self.F_p = nn.Sequential(
+            ModulatedDeformLayer(in_chs=2 * (5 * self.n_feats), out_chs=2 * (5 * self.n_feats)),
+        )
+        # condense layer
+        self.condense = conv1x1(2 * (5 * self.n_feats), 5 * self.n_feats)
+        # fusion layer
+        self.fusion = conv1x1(self.related_f * (5 * self.n_feats), self.related_f * (5 * self.n_feats))
+
+    def forward(self, hs):
+        # hs: [(n=4,c=80,h=64,w=64), ..., (n,c,h,w)]
+        self.nframes = len(hs)
+        f_ref = hs[self.center]
+        cor_l = []
+        for i in range(self.nframes):
+            if i != self.center:
+                cor = torch.cat([f_ref, hs[i]], dim=1)
+                cor = self.F_p(cor)
+                cor = self.condense(cor)
+                cor_l.append(cor)
+        cor_l.append(f_ref)
+        out = self.fusion(torch.cat(cor_l, dim=1))
+
+        return out
+
+
 
 # RDB-based RNN cell
 class RDBCell(nn.Module):
@@ -188,7 +223,10 @@ class Model(nn.Module):
         self.device = torch.device('cuda')
         self.cell = RDBCell(para)
         self.recons = Reconstructor(para)
-        self.fusion = GSA(para)
+        if para.align:
+            self.fusion = DGSA(para)
+        else:
+            self.fusion = GSA(para)
 
     def forward(self, x, profile_flag=False):
         if profile_flag:
