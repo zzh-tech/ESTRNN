@@ -27,7 +27,7 @@ environment:
    # image: wuzhiron/pytorch:pytorch1.5-cuda10.1-py36-detectron-mmdetection
    # image: wuzhiron/pytorch:pytorch1.6-cuda10.1-py36-detectron-mmdetection-apex
    # image: wuzhiron/pytorch:pytorch1.8-cuda11.1-py36
-   image: zhihangzhong/pytorch:mbd
+   image: zhihangzhong/pytorch:estrnn
    # registry: docker.io
    setup:
     - export PYTHONIOENCODING=utf-8
