@@ -1,8 +1,13 @@
-# ESTRNN
-[Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)  
+# ESTRNN & BSD
+Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)
+
+[Journal version (under review; new BSD dataset)](https://arxiv.org/abs/2106.16028)
+
+[Conference version (old BSD dataset)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf) 
 
 by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
+This work presents an efficient RNN-based model and the first real-world dataset for video deblurring :)
 
 ## Results
 
@@ -32,15 +37,28 @@ by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
 
 ## Beam-Splitter Deblurring Dataset (BSD)
 
-We have collected a new [BSD dataset](https://drive.google.com/file/d/1oBFvNxk6wn8SvioLGuqp43D8DtcQjItq/view?usp=sharing) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
+We have collected a new real-world video deblurring dataset ([BSD](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
 
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_system.png)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_demo.gif)
 
 The configurations of the new BSD dataset are as below:
 
-<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="600"/>
+<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="450"/>
 
+Results on different setups of BSD:
+
+<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/results_on_bsd.png" alt="bsd_config" width="600"/>
+
+Pretrained models for different setups:
+
+Please download [checkpoints](https://drive.google.com/file/d/1n39u16UP5FUe04NDK-rpiBQtjUHibyRf/view?usp=sharing) and unzip it under the main directory.
+
+Example command to run a pre-trained model:
+
+```bash
+python main.py --test_only --test_checkpoint ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar --ds_config 3ms24ms --video
+```
 
 ## Training
 
@@ -78,4 +96,14 @@ If you use any part of our code, or ESTRNN and BSD are useful for your research,
   year={2020},
   organization={Springer}
 }
+
+@misc{zhong2021efficient,
+      title={Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring}, 
+      author={Zhihang Zhong and Ye Gao and Yinqiang Zheng and Bo Zheng and Imari Sato},
+      year={2021},
+      eprint={2106.16028},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
 ```
