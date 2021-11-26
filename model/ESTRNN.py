@@ -132,9 +132,7 @@ class DGSA(nn.Module):
         self.num_fb = para.past_frames
         self.related_f = self.num_ff + 1 + self.num_fb
         # out channel: 160
-        self.F_p = nn.Sequential(
-            ModulatedDeformLayer(in_chs=2 * (5 * self.n_feats), out_chs=2 * (5 * self.n_feats)),
-        )
+        self.F_p = ModulatedDeformLayer(in_chs=2 * (5 * self.n_feats), out_chs=2 * (5 * self.n_feats))
         # condense layer
         self.condense = conv1x1(2 * (5 * self.n_feats), 5 * self.n_feats)
         # fusion layer
@@ -148,7 +146,7 @@ class DGSA(nn.Module):
         for i in range(self.nframes):
             if i != self.center:
                 cor = torch.cat([f_ref, hs[i]], dim=1)
-                cor = self.F_p(cor)
+                cor = self.F_p(cor, cor)
                 cor = self.condense(cor)
                 cor_l.append(cor)
         cor_l.append(f_ref)

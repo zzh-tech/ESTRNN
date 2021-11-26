@@ -1,0 +1,65 @@
+description: Blurry Pose Decomposition
+
+target:
+  service: amlk8s
+  subscription_id: 46da6261-2167-4e71-8b0d-f4a45215ce61
+
+  # run "amlt target list amlk8s" to list the names of available AMLK8s targets
+  #resource_group: researchvc-sea
+  #workspace_name: resrchvc-sea
+  #cluster: itpseasiav100cl
+  # cluster: itpseasiav100cl
+
+  # resource_group: researchvc-eus
+  # workspace_name: resrchvc-eus
+  # cluster: itpeastusv100cl
+  # cluster: itpeusp100cl
+
+  resource_group: researchvc-sc
+  workspace_name: resrchvc-sc
+  cluster: itpscusv100cl
+
+#  resource_group: researchvc
+#  workspace_name: resrchvc
+#  cluster: itplabrr1cl1
+
+environment:
+   # image: wuzhiron/pytorch:pytorch1.5-cuda10.1-py36-detectron-mmdetection
+   # image: wuzhiron/pytorch:pytorch1.6-cuda10.1-py36-detectron-mmdetection-apex
+   # image: wuzhiron/pytorch:pytorch1.8-cuda11.1-py36
+   image: zhihangzhong/pytorch:mbd
+   # registry: docker.io
+   setup:
+    - export PYTHONIOENCODING=utf-8
+
+code:
+  # local directory of the code. this will be uploaded to the server.
+  # $CONFIG_DIR is expanded to the directory of this config file
+  local_dir: $CONFIG_DIR/..
+
+storage:
+  input:
+    # storage_account_name: data4sea
+    # storage_account_name: data4eus
+    # storage_account_name: data4rr1
+    storage_account_name: data4sc
+    container_name: data
+  output:
+    storage_account_name: frontiers
+    container_name: bpd
+    is_output: True
+
+# list of jobs to run, we only run 1 job in this example
+# sku: GPU numbers
+# sku_count: computing node numbers (default 1)
+jobs:
+- name: estrnn_bsd_2ms16ms
+  sku: G4
+  command:
+    - bash ./aml_zhihang/estrnn_launcher.sh
+  submit_args:
+    constraints:
+    - tag: connectivityDomain
+      type: uniqueConstraint
+    container_args:
+      shm_size: 256G
