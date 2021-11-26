@@ -1,4 +1,4 @@
-description: Blurry Pose Decomposition
+description: Video Deblurring
 
 target:
   service: amlk8s
