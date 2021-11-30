@@ -146,7 +146,7 @@ def _test_lmdb(para, logger, model, ds_type):
     results_register = set()
     if para.dataset == 'gopro_ds_lmdb':
         B, H, W, C = 1, 540, 960, 3
-    elif para.dataset == 'reds_ds_lmdb':
+    elif para.dataset == 'reds_lmdb':
         B, H, W, C = 1, 720, 1280, 3
     data_test_path = join(para.data_root, para.dataset, para.dataset[:-4] + ds_type)
     data_test_gt_path = join(para.data_root, para.dataset, para.dataset[:-4] + ds_type + '_gt')
