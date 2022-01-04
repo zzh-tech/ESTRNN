@@ -7,7 +7,7 @@ Real-world Video Deblurring: A Benchmark Dataset and An Efficient Spatio-Tempora
 
 by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng, Imari Sato
 
-This work presents an efficient RNN-based model and **the first real-world dataset for video deblurring** :)
+This work presents an efficient RNN-based model and **the first real-world dataset for video deblurring** :-)
 
 ## Visual Results
 
@@ -41,7 +41,7 @@ Quantitative results on different setups of BSD:
 
 ## Quick Start
 
-### Required Libs
+### Prerequisites
 
 - Python 3.6
 - PyTorch 1.6 with GPU
@@ -62,7 +62,9 @@ Please download and unzip the dataset file for each benchmark.
 
 ### Training
 
-Specify *\<path\>* (e.g. "*./dataset/*") as where you put the dataset file and the corresponding dataset configurations in the command, or change the default values in "*./para/paramter.py*". 
+Specify *\<path\>* (e.g. "*./dataset/*") as where you put the dataset file.
+
+Modify the corresponding dataset configurations in the command, or change the default values in "*./para/paramter.py*". 
 
 Training command is as below:
 
@@ -78,28 +80,28 @@ python main.py --lr 1e-4 --batch_size 4 --num_gpus 2 --trainer_mode ddp
 
 If you want to train on your own dataset, please refer to "*/data/how_to_make_dataset_file.ipynb*".
 
-### Inference (Dataset)
+### Inference
 
 Please download [checkpoints](https://drive.google.com/file/d/1n39u16UP5FUe04NDK-rpiBQtjUHibyRf/view?usp=sharing) of pretrained models for different setups and unzip them under the main directory.
 
-#### For Dataset
+#### Dataset (Test Set) Inference
 
-Example of the command to run a pre-trained model on BSD (3ms-24ms):
+Command to run a pre-trained model on BSD (3ms-24ms):
 
 ```bash
 python main.py --test_only --test_checkpoint ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar --dataset BSD --ds_config 3ms24ms --video
 ```
 
-#### For Blurry Video
+#### Blurry Video Inference
 
-Specify **"--src \<path\>"** as where you put the blurry video file (e.g., "--src ./blur.mp4") or video dir (e.g., "--src ./blur", the file format under the directory should be indexed as ./blur/00000000.png, ./blur/00000001.png, ...).
+Specify **"--src \<path\>"** as where you put the blurry video file (e.g., "--src ./blur.mp4") or video directory (e.g., "--src ./blur/", the image files under the directory should be indexed as "./blur/00000000.png", "./blur/00000001.png", ...).
 
 Specify **"--dst \<path\>"** as where you store the results (e.g., "--dst ./results/").
 
-Example of the command to run a pre-trained model for a blurry video is as below:
+Command to run a pre-trained model for a blurry video is as below:
 
 ```bash
-python inference.py --src <path> --dst <path> --ckpt ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar
+python inference.py --src <path> --dst <path> --ckpt ./checkpoints/ESTRNN_C80B15_BSD_2ms16ms.tar
 ```
 
 ## Citing
