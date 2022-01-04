@@ -1,38 +1,26 @@
 # ESTRNN & BSD
 Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)
-
-[Journal version (under review; new BSD dataset)](https://arxiv.org/abs/2106.16028)
-
 [Conference version (old BSD dataset)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf) 
 
-by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng
+Real-world Video Deblurring: A Benchmark Dataset and An Efficient Spatio-Temporal Recurrent Neural Network
+[Journal version (under review; new BSD dataset)](https://arxiv.org/abs/2106.16028)
 
-This work presents an efficient RNN-based model and the first real-world dataset for video deblurring :)
+by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng, Imari Sato
 
-## Results
+This work presents an efficient RNN-based model and **the first real-world dataset for video deblurring** :)
 
-### Results on REDS
+## Visual Results
+
+### Results on REDS (Synthetic)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/reds.gif)
 
 
-### Results on GOPRO
+### Results on GOPRO (Synthetic)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/gopro.gif)
 
 
-### Results on BSD
+### Results on BSD (Real-world)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd.gif)
-
-
-## Prerequisites
-
-- Python 3.6
-- PyTorch 1.6 with GPU
-- opencv-python
-- scikit-image
-- lmdb
-- thop
-- tqdm
-- tensorboard
 
 
 ## Beam-Splitter Deblurring Dataset (BSD)
@@ -46,42 +34,73 @@ The configurations of the new BSD dataset are as below:
 
 <img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="450"/>
 
-Results on different setups of BSD:
+Quantitative results on different setups of BSD:
 
 <img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/results_on_bsd.png" alt="bsd_config" width="600"/>
 
-Pretrained models for different setups:
 
-Please download [checkpoints](https://drive.google.com/file/d/1n39u16UP5FUe04NDK-rpiBQtjUHibyRf/view?usp=sharing) and unzip it under the main directory.
+## Quick Start
 
-Example command to run a pre-trained model:
+### Required Libs
 
-```bash
-python main.py --test_only --test_checkpoint ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar --ds_config 3ms24ms --video
-```
+- Python 3.6
+- PyTorch 1.6 with GPU
+- opencv-python
+- scikit-image
+- lmdb
+- thop
+- tqdm
+- tensorboard
 
-## Training
+### Downloading Datasets
 
 Please download and unzip the dataset file for each benchmark.
 
-- [BSD](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)
-- [GOPRO-DS](https://drive.google.com/file/d/1Tni2gZzI_Hd03Msc8Rrxl5JklznqO9AG/view?usp=sharing)
+- [**BSD**](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)
+- [GOPRO](https://drive.google.com/file/d/1Tni2gZzI_Hd03Msc8Rrxl5JklznqO9AG/view?usp=sharing)
 - [REDS](https://drive.google.com/file/d/1wMOtIqmnNfXqe0_-Xq0Xj6WMspCaEgRR/view?usp=sharing)
 
-Then, specify the *\<path\>* (e.g. "*./dataset/* ") where you put the dataset file and the corresponding dataset configurations in the command, or change the default values in "*./para/paramter.py*". 
+### Training
+
+Specify *\<path\>* (e.g. "*./dataset/*") as where you put the dataset file and the corresponding dataset configurations in the command, or change the default values in "*./para/paramter.py*". 
 
 Training command is as below:
 
 ```bash
-python main.py --data_root <path> --dataset BSD --ds_config 2ms16ms --data_format RGB
+python main.py --data_root <path> --dataset BSD --ds_config 2ms16ms
 ```
 
-You can also tune the hyper parameters such as batch size, learning rate, epoch number, etc. (P.S.: the actual batch size for ddp mode is num_gpus*batch_size) 
+You can also tune the hyper-parameters such as batch size, learning rate, epoch number (P.S.: the actual batch size for ddp mode is num_gpus*batch_size):
+
 ```bash
 python main.py --lr 1e-4 --batch_size 4 --num_gpus 2 --trainer_mode ddp
 ```
 
 If you want to train on your own dataset, please refer to "*/data/how_to_make_dataset_file.ipynb*".
+
+### Inference (Dataset)
+
+Please download [checkpoints](https://drive.google.com/file/d/1n39u16UP5FUe04NDK-rpiBQtjUHibyRf/view?usp=sharing) of pretrained models for different setups and unzip them under the main directory.
+
+#### For Dataset
+
+Example of the command to run a pre-trained model on BSD (3ms-24ms):
+
+```bash
+python main.py --test_only --test_checkpoint ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar --dataset BSD --ds_config 3ms24ms --video
+```
+
+#### For Blurry Video
+
+Specify **"--src \<path\>"** as where you put the blurry video file (e.g., "--src ./blur.mp4") or video dir (e.g., "--src ./blur", the file format under the directory should be indexed as ./blur/00000000.png, ./blur/00000001.png, ...).
+
+Specify **"--dst \<path\>"** as where you store the results (e.g., "--dst ./results/").
+
+Example of the command to run a pre-trained model for a blurry video is as below:
+
+```bash
+python inference.py --src <path> --dst <path> --ckpt ./checkpoints/ESTRNN_C80B15_BSD_3ms24ms.tar
+```
 
 ## Citing
 

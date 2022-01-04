@@ -1,6 +1,8 @@
 __pycache__/
 experiment/
 results/
+checkpoints/
+*.zip
 *.py[cod]
 *.so
 *.egg

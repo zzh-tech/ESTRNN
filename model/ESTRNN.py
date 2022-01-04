@@ -206,7 +206,6 @@ class Model(nn.Module):
             out = self.fusion(hs[i - self.num_fb:i + self.num_ff + 1])
             out = self.recons(out)
             outputs.append(out.unsqueeze(dim=1))
-
         return torch.cat(outputs, dim=1)
 
     # For calculating GMACs
