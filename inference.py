@@ -29,8 +29,11 @@ if __name__ == '__main__':
         args.src = join(dirname(args.src), basename(args.src).replace('.', '_'))
         os.makedirs(args.src, exist_ok=True)
         for i in range(num_frames):
-            ret, img = vid_cap.read()
-            cv2.imwrite(join(args.src, '{:08d}.png'.format(i)), img)
+            try:
+                ret, img = vid_cap.read()
+                cv2.imwrite(join(args.src, '{:08d}.png'.format(i)), img)
+            except:
+                break
 
     img_paths = sorted(os.listdir(args.src), key=lambda x: int(x.split('.')[0]))
     save_dir = args.dst
