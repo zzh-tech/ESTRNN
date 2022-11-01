@@ -1,13 +1,11 @@
 # ESTRNN & BSD
-Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring (ECCV2020 Spotlight)
-[Conference version (old BSD dataset)](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf) 
+**[ECCV2020 Spotlight]** [Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring](https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123510188.pdf)
 
-Real-world Video Deblurring: A Benchmark Dataset and An Efficient Spatio-Temporal Recurrent Neural Network
-[Journal version (under review; new BSD dataset)](https://arxiv.org/abs/2106.16028)
+**[IJCV2022]** [Real-world Video Deblurring: A Benchmark Dataset and An Efficient Spatio-Temporal Recurrent Neural Network](https://arxiv.org/abs/2106.16028) ([Springer Link](https://link.springer.com/article/10.1007/s11263-022-01705-6))
 
-by Zhihang Zhong, Ye Gao, Yinqiang Zheng, Bo Zheng, Imari Sato
+by [Zhihang Zhong](https://zzh-tech.github.io/), Ye Gao, Yinqiang Zheng, Bo Zheng, Imari Sato
 
-This work presents an efficient RNN-based model and **the first real-world dataset for video deblurring** :-)
+This work presents an efficient RNN-based model and **the first real-world dataset for image/video deblurring** :-)
 
 ## Visual Results
 
@@ -27,16 +25,16 @@ This work presents an efficient RNN-based model and **the first real-world datas
 
 We have collected a new real-world video deblurring dataset ([BSD](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)) with more scenes and better setups (center-aligned), using the proposed beam-splitter acquisition system:
 
-![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_system.png)
+![image](https://drive.google.com/uc?export=view&id=1CewlyJTUrZk8CqwU6zDRelyoQBNK-Ahw)
 ![image](https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_demo.gif)
 
 The configurations of the new BSD dataset are as below:
 
-<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/bsd_config.png" alt="bsd_config" width="450"/>
+<img src="https://drive.google.com/uc?export=view&id=1LXng0rsxnTgJRDdBu_7-Jg6d4_HyEpIl" alt="bsd_config" width="450"/>
 
 Quantitative results on different setups of BSD:
 
-<img src="https://github.com/zzh-tech/Images/blob/master/ESTRNN/results_on_bsd.png" alt="bsd_config" width="600"/>
+<img src="https://drive.google.com/uc?export=view&id=1gC98Jn07F2blLmftZqTwxPAld8KyNZEL" alt="bsd_config" width="800"/>
 
 
 ## Quick Start
@@ -118,13 +116,13 @@ If you use any part of our code, or ESTRNN and BSD are useful for your research,
   organization={Springer}
 }
 
-@misc{zhong2021efficient,
-      title={Efficient Spatio-Temporal Recurrent Neural Network for Video Deblurring}, 
-      author={Zhihang Zhong and Ye Gao and Yinqiang Zheng and Bo Zheng and Imari Sato},
-      year={2021},
-      eprint={2106.16028},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{zhong2022real,
+  title={Real-World Video Deblurring: A Benchmark Dataset and an Efficient Recurrent Neural Network},
+  author={Zhong, Zhihang and Gao, Ye and Zheng, Yinqiang and Zheng, Bo and Sato, Imari},
+  journal={International Journal of Computer Vision},
+  pages={1--18},
+  year={2022},
+  publisher={Springer}
 }
 
 ```
