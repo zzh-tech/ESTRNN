@@ -54,9 +54,15 @@ Quantitative results on different setups of BSD:
 
 Please download and unzip the dataset file for each benchmark.
 
-- [**BSD**](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing)
+- [**BSD**](https://drive.google.com/drive/folders/1imcfS1oFpWF8Zn0volcDIHf7o7aVm1nk?usp=share_link) ([**Full BSD with RAW**](https://drive.google.com/file/d/19cel6QgofsWviRbA5IPMEv_hDbZ30vwH/view?usp=sharing))
 - [GOPRO](https://drive.google.com/file/d/1Tni2gZzI_Hd03Msc8Rrxl5JklznqO9AG/view?usp=sharing)
 - [REDS](https://drive.google.com/file/d/1wMOtIqmnNfXqe0_-Xq0Xj6WMspCaEgRR/view?usp=sharing)
+
+If you failed to download BSD from Google drive, please try the following BaiduCloudDisk version:  
+[BSD 1ms8ms](https://pan.baidu.com/s/1i7iMOZVOvBWmNYi8zkQIpw), password: bsd1  
+[BSD 2ms16ms](https://pan.baidu.com/s/1ur-XHeNoSTPFQJwBVfbofQ), password: bsd2  
+[BSD 3ms24ms](https://pan.baidu.com/s/1QNJlxiduwbQzCypy-7Mlbw), password: bsd3  
+
 
 ### Training
 
