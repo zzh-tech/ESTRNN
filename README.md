@@ -116,18 +116,20 @@ If you use any part of our code, or ESTRNN and BSD are useful for your research,
 @inproceedings{zhong2020efficient,
   title={Efficient spatio-temporal recurrent neural network for video deblurring},
   author={Zhong, Zhihang and Gao, Ye and Zheng, Yinqiang and Zheng, Bo},
-  booktitle={European Conference on Computer Vision},
+  booktitle={Computer Vision--ECCV 2020: 16th European Conference, Glasgow, UK, August 23--28, 2020, Proceedings, Part VI 16},
   pages={191--207},
   year={2020},
   organization={Springer}
 }
 
-@article{zhong2022real,
-  title={Real-World Video Deblurring: A Benchmark Dataset and an Efficient Recurrent Neural Network},
+@article{zhong2023real,
+  title={Real-world video deblurring: A benchmark dataset and an efficient recurrent neural network},
   author={Zhong, Zhihang and Gao, Ye and Zheng, Yinqiang and Zheng, Bo and Sato, Imari},
   journal={International Journal of Computer Vision},
-  pages={1--18},
-  year={2022},
+  volume={131},
+  number={1},
+  pages={284--301},
+  year={2023},
   publisher={Springer}
 }
 
